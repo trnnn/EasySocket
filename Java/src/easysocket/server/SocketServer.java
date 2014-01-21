@@ -73,7 +73,7 @@ public class SocketServer {
 		AsynchronousServerSocketChannel server = AsynchronousServerSocketChannel
 				.open(channelGroup);
 		server.bind(new InetSocketAddress(port));
-
+		this.server = server;
 		this.pendingAccept();
 		logger.debug("server started at port " + this.port);
 	}
