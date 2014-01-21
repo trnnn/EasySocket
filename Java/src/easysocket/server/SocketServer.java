@@ -36,14 +36,20 @@ public class SocketServer {
 		public void completed(AsynchronousSocketChannel channel, Void attachment) {
 			SocketServer.this.pendingAccept();
 
-			AioTcpSession session = new AioTcpSession(channel);
-			session.pendingRead();
-			int sessionId = session.getSessionId();
-			SESSION_POOL.put(sessionId, session);
+			AioTcpSession session = null;
+			try {
+				session = new AioTcpSession(channel);
+				session.pendingRead();
+				int sessionId = session.getSessionId();
+				SESSION_POOL.put(sessionId, session);
 
-			if (connectedEventHandler != null) {
-				connectedEventHandler.OnConnect(session);
+				if (connectedEventHandler != null) {
+					connectedEventHandler.OnConnect(session);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
+
 		}
 
 		@Override
