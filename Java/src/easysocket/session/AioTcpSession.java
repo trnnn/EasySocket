@@ -13,7 +13,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.nio.channels.ReadPendingException;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -86,8 +85,6 @@ public class AioTcpSession {
 					session.close();
 				}
 			} catch (IOException e) {
-				logger.error("ReadComletionHandler.completed. msg:"
-						+ e.getMessage());
 				PrintStackTrace.print(logger, e);
 				try {
 					session.close();
@@ -97,8 +94,6 @@ public class AioTcpSession {
 					PrintStackTrace.print(logger, e1);
 				}
 			} catch (Exception e) {
-				logger.error("ReadComletionHandler.completed. msg:"
-						+ e.getMessage());
 				PrintStackTrace.print(logger, e);
 				try {
 					session.close();
@@ -145,7 +140,6 @@ public class AioTcpSession {
 	public final SessionState sessionState = new SessionState(
 			SessionState.UNKNOWN);
 	private List<SessionEventListener> eventListeners = new CopyOnWriteArrayList<>();
-	private boolean hasStartedReading = false;
 
 	private static final PacketBuilder PACKET_BUILDER = new PacketBuilder();
 
@@ -199,13 +193,7 @@ public class AioTcpSession {
 	}
 
 	public final void pendingRead() {
-		if (hasStartedReading) {
-			logger.error("this session has started reading already");
-			throw new ReadPendingException();
-		}
-		hasStartedReading = true;
 		beforeRead(this.readBuffer);
-		// if (this.channel.isOpen())
 		this.channel.read(this.readBuffer, this, this.readCompletionHandler);
 	}
 
@@ -241,8 +229,8 @@ public class AioTcpSession {
 		this.pushWriteData(buffer);
 	}
 
-	private ByteBuffer formatSendPacket(short cmd, byte[] data) {
-		int packetSize = 4 + 2 + data.length;
+	private ByteBuffer formatSendPacket(int cmd, byte[] data) {
+		int packetSize = 4 + 4 + data.length;
 		ByteBuffer buffer = ByteBuffer.allocate(packetSize);
 		buffer.putInt(packetSize);
 		buffer.putInt(cmd);
@@ -268,14 +256,7 @@ public class AioTcpSession {
 			ByteBuffer buffer = outs.poll();
 			if (buffer != null) {
 				this.writeBuffer = buffer;
-				int cmd = this.writeBuffer
-						.getShort(this.writeBuffer.position() + 4);
-				if (cmd == 0) {
-					logger.error(
-							"AioSession.write, send packet cmd 0, data->{}",
-							new String(this.writeBuffer.array()));
-				}
-				this.channel.write(buffer, this, this.writeCompletionHandler);
+				this.channel.write(this.writeBuffer, this, this.writeCompletionHandler);
 			} else {
 				isWriting.set(false);
 			}
