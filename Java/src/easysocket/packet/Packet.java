@@ -18,23 +18,23 @@ import easysocket.session.AioTcpSession;
 
 public class Packet {
 	static final Logger logger = LoggerFactory.getLogger(Packet.class);
-	private final short cmd;
+	private final int cmd;
 	private final ByteBuffer buffer;
 	private AioTcpSession session;
 	private static final ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
 
-	public Packet(short cmd, AioTcpSession session) {
+	public Packet(int cmd, AioTcpSession session) {
 		this(cmd, Short.MAX_VALUE, session);
 	}
 
-	public Packet(short cmd, byte[] data, AioTcpSession session) {
+	public Packet(int cmd, byte[] data, AioTcpSession session) {
 		this.cmd = cmd;
 		this.session = session;
 		buffer = ByteBuffer.wrap(data);
 		buffer.order(byteOrder);
 	}
 
-	public Packet(short cmd, int initialBufferSize, AioTcpSession session) {
+	public Packet(int cmd, int initialBufferSize, AioTcpSession session) {
 		this.cmd = cmd;
 		this.session = session;
 		buffer = ByteBuffer.allocate(initialBufferSize);
@@ -45,7 +45,7 @@ public class Packet {
 		return this.buffer;
 	}
 
-	public short getCmd() {
+	public int getCmd() {
 		return cmd;
 	}
 
