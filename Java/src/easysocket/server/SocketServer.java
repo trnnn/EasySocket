@@ -1,3 +1,11 @@
+/*
+ * EasySocket SocketServer.java
+ *
+ * Copyright (c) 2014, Qingfeng Lee
+ * PROJECT DESCRIPTION
+ * 
+ * See LICENSE file for more information
+ */
 package easysocket.server;
 
 import java.io.IOException;
