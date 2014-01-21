@@ -10,6 +10,7 @@ package easysocket.session;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
@@ -32,8 +33,8 @@ import easysocket.utils.PrintStackTrace;
  * Use <code>AioTcpSession</code> to store the information of a socket
  * connection
  * 
- * Invoke {@link #onReceivePacket(SessionReceivedPacketListener)} to
- * specify packet received event lister
+ * Invoke {@link #onReceivePacket(SessionReceivedPacketListener)} to specify
+ * packet received event lister
  * 
  * @see SessionReceivedPacketListener
  */
@@ -155,12 +156,38 @@ public class AioTcpSession {
 		this.eventListeners.add(listener);
 	}
 
-	public AioTcpSession(AsynchronousSocketChannel channel) {
+	/**
+	 * Instantiates a new AioTcpSession instance.
+	 * {@link AsynchronousSocketChannel} passed by should be connected to socket
+	 * server successfully already, otherwise it will throw {@link IOException}
+	 * 
+	 * @param channel
+	 * @throws IOException
+	 */
+	public AioTcpSession(AsynchronousSocketChannel channel) throws IOException {
+		if (!channel.isOpen()) {
+			throw new IOException();
+		}
 		this.sessionId = sessionIndex.addAndGet(1);
 		this.readCompletionHandler = new ReadComletionHandler();
 		this.writeCompletionHandler = new WriteCompletionHandler();
 		this.channel = channel;
 		this.sessionState.set(SessionState.OPENED);
+	}
+
+	/**
+	 * make a connection to socket server. this method will block the invoker
+	 * until connected successful or some error occures
+	 * 
+	 * @param addr
+	 * @return new AioTcpSession object
+	 * @throws IOException
+	 */
+	public static AioTcpSession open(SocketAddress addr) throws IOException {
+		AsynchronousSocketChannel channel = AsynchronousSocketChannel.open();
+		channel.connect(addr);
+		AioTcpSession session = new AioTcpSession(channel);
+		return session;
 	}
 
 	protected void queuePacket(ByteBuffer buffer) {
@@ -192,6 +219,10 @@ public class AioTcpSession {
 		}
 	}
 
+	
+	/**
+	 * start reading data from from socket 
+	 */
 	public final void pendingRead() {
 		beforeRead(this.readBuffer);
 		this.channel.read(this.readBuffer, this, this.readCompletionHandler);
@@ -256,7 +287,8 @@ public class AioTcpSession {
 			ByteBuffer buffer = outs.poll();
 			if (buffer != null) {
 				this.writeBuffer = buffer;
-				this.channel.write(this.writeBuffer, this, this.writeCompletionHandler);
+				this.channel.write(this.writeBuffer, this,
+						this.writeCompletionHandler);
 			} else {
 				isWriting.set(false);
 			}
