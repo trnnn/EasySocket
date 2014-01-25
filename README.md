@@ -24,7 +24,6 @@ mv jar/easysocket.jar /path/to/your/libs/project
 * __Server:__
 
 ``` java
-
 public class ServerDemo {
 
 	public static void main(String[] args) throws IOException,
@@ -71,13 +70,11 @@ public class ServerDemo {
 		Thread.currentThread().join();
 	}
 }	
-
 ```
 
 * __Client:__
 
 ``` java
-
 public class ClientDemo {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
@@ -117,5 +114,4 @@ public class ClientDemo {
 		Thread.currentThread().join();
 	}
 }
-
 ...
