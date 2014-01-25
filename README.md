@@ -1,7 +1,7 @@
 EasySocket
 ==========
 
-EasySocket is an concise way to build socket based applications, it provides reliable data communication.
+EasySocket is a concise way to build socket based applications, it provides reliable data communication.
 
 Features:
 
