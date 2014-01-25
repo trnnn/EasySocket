@@ -105,12 +105,11 @@ public class ClientDemo {
 		Thread.currentThread().join();
 	}
 }
-...
+```
 
 
 Checkout and compile the project:
 
  * with git
-... bash
- git clone git://github.com/Gottox/socket.io-java-client.git
-...
+ 
+		git clone git://github.com/Gottox/socket.io-java-client.git
