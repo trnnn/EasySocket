@@ -12,15 +12,6 @@ Features:
 
 Using Easysocket is quite simple. But lets see:
 
-Checkout and compile the project:
-
-``` bash
-git clone git@github.com:trnnn/EasySocket.git
-cd EasySocket
-ant jar
-mv jar/easysocket.jar /path/to/your/libs/project
-```
-
 * __Server:__
 
 ``` java
@@ -115,3 +106,10 @@ public class ClientDemo {
 	}
 }
 ...
+
+
+Checkout and compile the project:
+
+ * with git
+ 
+		git clone git://github.com/Gottox/socket.io-java-client.git
