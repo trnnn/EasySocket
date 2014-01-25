@@ -7,6 +7,9 @@ Features:
 
  * __stream packet__ - EasySocket provides a binary stream packet formation,
 
+packet formation:
+------------------------------------------------------------------
+| packet length(4byte) | cmd(4byte) |         data               | ------------------------------------------------------------------
 
 ## How to use
 
