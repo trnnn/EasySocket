@@ -21,10 +21,11 @@ ant jar
 mv jar/easysocket.jar /path/to/your/libs/project
 ```
 
+* __Server:__
 
 ``` java
 
-public class ServerTest {
+public class ServerDemo {
 
 	public static void main(String[] args) throws IOException,
 			InterruptedException {
@@ -73,3 +74,48 @@ public class ServerTest {
 
 ```
 
+* __Client:__
+
+``` java
+
+public class ClientDemo {
+
+	public static void main(String[] args) throws IOException, InterruptedException {
+		AsynchronousSocketChannel client = AsynchronousSocketChannel.open();
+		client.connect(new InetSocketAddress("127.0.0.1", 8000));
+		final AioTcpSession session = new AioTcpSession(client);
+		session.pendingRead();
+		session.registerEventListener(new SessionReceivedPacketListener() {
+
+			@Override
+			public void onReceivePackets(List<Packet> packets) {
+				for (Packet packet : packets) {
+					String msg =StringUtil.getString(packet.getByteBuffer());
+					System.out.println("server:" + msg);
+				}
+			}
+		});
+		Thread thread= new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while(true){
+					String msg = "this is message from client, "
+							+ new Date();
+					Packet packet = new Packet(1000,
+							4 + msg.length(), session);
+					StringUtil.putString(packet.getByteBuffer(), msg);
+					session.sendPacket(packet);
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+		thread.start();
+		Thread.currentThread().join();
+	}
+}
+
+...
