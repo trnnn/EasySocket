@@ -10,7 +10,7 @@ Features:
 packet formation:
 ``` java
 ------------------------------------------------------------------
-| packet length(4byte) | cmd(4byte) |         data               | 
+| length(4bytes) | cmd(4bytes) |            data                 | 
 ------------------------------------------------------------------
 ```
 ## How to use
