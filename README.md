@@ -111,5 +111,6 @@ public class ClientDemo {
 Checkout and compile the project:
 
  * with git
- 
-		git clone git://github.com/Gottox/socket.io-java-client.git
+... bash
+ git clone git://github.com/Gottox/socket.io-java-client.git
+...
