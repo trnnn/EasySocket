@@ -7,6 +7,12 @@ Features:
 
  * __stream packet__ - EasySocket provides a binary stream packet formation instead of continuous stream. 
 
+Packet formation:
+``` java
+---------------------------------------------------------------------
+| packet length(4byte) | cmd(4byte) |         data                  | 
+---------------------------------------------------------------------
+```
 
 ## How to use
 
