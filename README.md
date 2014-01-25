@@ -1,12 +1,25 @@
 EasySocket
 ==========
 
-Build socket based applications easily.
+EasySocket is an easy way to build socket based applications, it provides reliable data communication.
+
+Features:
+
+ * __stream packet__ - EasySocket provides a binary stream packet formation,
 
 
-Hello Fxxk World!!
+## How to use
 
+Using Easysocket is quite simple. But lets see:
 
+Checkout and compile the project:
+
+``` bash
+git clone git@github.com:trnnn/EasySocket.git
+cd EasySocket
+ant jar
+mv jar/easysocket.jar /path/to/your/libs/project
+```
 
 
 ``` java
@@ -60,11 +73,3 @@ public class ServerTest {
 
 ```
 
-Checkout and compile the project:
-
-``` bash
-git clone git@github.com:trnnn/EasySocket.git
-cd EasySocket
-ant jar
-mv jar/easysocket.jar /path/to/your/libs/project
-```
