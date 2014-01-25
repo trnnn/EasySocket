@@ -121,3 +121,6 @@ Checkout and compile the project:
  * with git
  
 		git clone git://github.com/Gottox/socket.io-java-client.git
+
+## Environmental Requirement
+ * JDK1.7
