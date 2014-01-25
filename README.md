@@ -5,17 +5,12 @@ EasySocket is a concise way to build socket based applications, it provides reli
 
 Features:
 
- * __stream packet__ - EasySocket provides a binary stream packet formation,
+ * __stream packet__ - EasySocket provides a binary stream packet formation instead of continuous stream. 
 
-packet formation:
-``` java
-------------------------------------------------------------------
-| length(4bytes) | cmd(4bytes) |            data                 | 
-------------------------------------------------------------------
-```
+
 ## How to use
 
-Using Easysocket is quite simple. But lets see:
+Using Easysocket is quite simple. Lets see:
 
 * __Server:__
 
