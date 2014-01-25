@@ -107,6 +107,7 @@ public class ClientDemo {
 }
 ```
 
+## Checkout
 
 Checkout and compile the project:
 
