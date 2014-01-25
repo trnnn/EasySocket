@@ -34,7 +34,7 @@ import easysocket.utils.PrintStackTrace;
  * connection
  * 
  * Invoke {@link #onReceivePacket(SessionReceivedPacketListener)} to specify
- * packet received event lister
+ * packet received event listener
  * 
  * @see SessionReceivedPacketListener
  */
@@ -158,7 +158,7 @@ public class AioTcpSession {
 
 	/**
 	 * Instantiates a new AioTcpSession instance.
-	 * {@link AsynchronousSocketChannel} passed by should be connected to socket
+	 * {@link AsynchronousSocketChannel} delivered should be connected to socket
 	 * server successfully already, otherwise it will throw {@link IOException}
 	 * 
 	 * @param channel
