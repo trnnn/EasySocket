@@ -176,7 +176,7 @@ public class AioTcpSession {
 	}
 
 	/**
-	 * make a connection to socket server. this method will block the invoker
+	 * Make a connection to socket server. This method will block the invoker
 	 * until connected successful or some error occures
 	 * 
 	 * @param addr
