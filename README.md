@@ -120,7 +120,7 @@ Checkout and compile the project:
 
  * with git
  
-		git clone git://github.com/Gottox/socket.io-java-client.git
+		git clone git@github.com:trnnn/EasySocket.git
 
 ## Environmental Requirement
  * JDK1.7
