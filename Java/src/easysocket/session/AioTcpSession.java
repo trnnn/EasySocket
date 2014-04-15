@@ -27,7 +27,7 @@ import easysocket.utils.PrintStackTrace;
  * connection
  * 
  * Invoke {@link #onReceivePacket(SessionReceivedPacketListener)} to specify
- * packet received event lister
+ * packet received event listener
  * 
  * @see SessionReceivedPacketListener
  */
@@ -155,13 +155,46 @@ public class AioTcpSession {
 		this.eventListeners.add(listener);
 	}
 
+<<<<<<< HEAD
 	public AioTcpSession(AsynchronousSocketChannel channel) {
+=======
+	/**
+	 * Instantiates a new AioTcpSession instance.
+	 * {@link AsynchronousSocketChannel} delivered should be connected to socket
+	 * server successfully already, otherwise it will throw {@link IOException}
+	 * 
+	 * @param channel
+	 * @throws IOException
+	 */
+	public AioTcpSession(AsynchronousSocketChannel channel) throws IOException {
+		if (!channel.isOpen()) {
+			throw new IOException();
+		}
+>>>>>>> a8279c862a4ba9afbb535658dde2f60bd1257584
 		this.sessionId = sessionIndex.addAndGet(1);
 		this.readCompletionHandler = new ReadComletionHandler();
 		this.writeCompletionHandler = new WriteCompletionHandler();
 		this.channel = channel;
 		this.sessionState.set(SessionState.OPENED);
+<<<<<<< HEAD
 		this.readBuffer.order(BYTE_ORDER);
+=======
+	}
+
+	/**
+	 * Make a connection to socket server. This method will block the invoker
+	 * until connected successful or some error occures
+	 * 
+	 * @param addr
+	 * @return new AioTcpSession object
+	 * @throws IOException
+	 */
+	public static AioTcpSession open(SocketAddress addr) throws IOException {
+		AsynchronousSocketChannel channel = AsynchronousSocketChannel.open();
+		channel.connect(addr);
+		AioTcpSession session = new AioTcpSession(channel);
+		return session;
+>>>>>>> a8279c862a4ba9afbb535658dde2f60bd1257584
 	}
 
 	protected void queuePacket(ByteBuffer buffer) {
