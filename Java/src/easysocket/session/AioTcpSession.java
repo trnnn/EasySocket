@@ -1,17 +1,9 @@
-/*
- * EasySocket AioTcpSession.java
- *
- * Copyright (c) 2014, Qingfeng Lee
- * PROJECT DESCRIPTION
- * 
- * See LICENSE file for more information
- */
 package easysocket.session;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.List;
@@ -27,6 +19,7 @@ import easysocket.packet.Packet;
 import easysocket.packet.PacketBuilder;
 import easysocket.session.event.SessionEventListener;
 import easysocket.session.event.SessionReceivedPacketListener;
+import easysocket.utils.CRC16;
 import easysocket.utils.PrintStackTrace;
 
 /**
@@ -86,6 +79,8 @@ public class AioTcpSession {
 					session.close();
 				}
 			} catch (IOException e) {
+				logger.error("ReadComletionHandler.completed. msg:"
+						+ e.getMessage());
 				PrintStackTrace.print(logger, e);
 				try {
 					session.close();
@@ -95,6 +90,8 @@ public class AioTcpSession {
 					PrintStackTrace.print(logger, e1);
 				}
 			} catch (Exception e) {
+				logger.error("ReadComletionHandler.completed. msg:"
+						+ e.getMessage());
 				PrintStackTrace.print(logger, e);
 				try {
 					session.close();
@@ -141,7 +138,9 @@ public class AioTcpSession {
 	public final SessionState sessionState = new SessionState(
 			SessionState.UNKNOWN);
 	private List<SessionEventListener> eventListeners = new CopyOnWriteArrayList<>();
-
+	public static final ByteOrder BYTE_ORDER = ByteOrder.LITTLE_ENDIAN;
+	private AtomicBoolean isClosed = new AtomicBoolean(false);
+	
 	private static final PacketBuilder PACKET_BUILDER = new PacketBuilder();
 
 	public void registerEventListener(SessionEventListener listener) {
@@ -156,38 +155,13 @@ public class AioTcpSession {
 		this.eventListeners.add(listener);
 	}
 
-	/**
-	 * Instantiates a new AioTcpSession instance.
-	 * {@link AsynchronousSocketChannel} passed by should be connected to socket
-	 * server successfully already, otherwise it will throw {@link IOException}
-	 * 
-	 * @param channel
-	 * @throws IOException
-	 */
-	public AioTcpSession(AsynchronousSocketChannel channel) throws IOException {
-		if (!channel.isOpen()) {
-			throw new IOException();
-		}
+	public AioTcpSession(AsynchronousSocketChannel channel) {
 		this.sessionId = sessionIndex.addAndGet(1);
 		this.readCompletionHandler = new ReadComletionHandler();
 		this.writeCompletionHandler = new WriteCompletionHandler();
 		this.channel = channel;
 		this.sessionState.set(SessionState.OPENED);
-	}
-
-	/**
-	 * make a connection to socket server. this method will block the invoker
-	 * until connected successful or some error occures
-	 * 
-	 * @param addr
-	 * @return new AioTcpSession object
-	 * @throws IOException
-	 */
-	public static AioTcpSession open(SocketAddress addr) throws IOException {
-		AsynchronousSocketChannel channel = AsynchronousSocketChannel.open();
-		channel.connect(addr);
-		AioTcpSession session = new AioTcpSession(channel);
-		return session;
+		this.readBuffer.order(BYTE_ORDER);
 	}
 
 	protected void queuePacket(ByteBuffer buffer) {
@@ -219,12 +193,9 @@ public class AioTcpSession {
 		}
 	}
 
-	
-	/**
-	 * start reading data from from socket 
-	 */
 	public final void pendingRead() {
 		beforeRead(this.readBuffer);
+		// if (this.channel.isOpen())
 		this.channel.read(this.readBuffer, this, this.readCompletionHandler);
 	}
 
@@ -234,19 +205,26 @@ public class AioTcpSession {
 		tmp.position(0);
 
 		readBuffer = ByteBuffer.allocate(readBuffer.capacity() * 2);
+		readBuffer.order(BYTE_ORDER);
 		readBuffer.put(tmp.array(), 0, pos);
 	}
 
 	public void close() throws IOException {
-		this.onClose();
-		if (this.channel.isOpen())
-			this.channel.close();
+		if (isClosed.compareAndSet(false, true)) {
+			this.onClose();
+			if (this.channel.isOpen())
+				this.channel.close();
+		}
 	}
 
 	private void onClose() {
 		for (SessionEventListener listener : this.eventListeners) {
 			listener.onClose();
 		}
+	}
+	
+	public boolean isClosed(){
+		return this.isClosed.get();
 	}
 
 	protected final void pushWriteData(ByteBuffer buffer) {
@@ -255,17 +233,32 @@ public class AioTcpSession {
 	}
 
 	public void sendPacket(Packet packet) {
-		ByteBuffer buffer = this.formatSendPacket(packet.getCmd(), packet
-				.getByteBuffer().array());
+		ByteBuffer dataBuffer = packet.getByteBuffer();
+		dataBuffer.flip();
+		byte[] data = new byte[dataBuffer.limit()];
+		dataBuffer.get(data);
+		ByteBuffer buffer = this.formatSendPacket(packet.getCmd(), data);
 		this.pushWriteData(buffer);
 	}
 
-	private ByteBuffer formatSendPacket(int cmd, byte[] data) {
-		int packetSize = 4 + 4 + data.length;
+	private ByteBuffer formatSendPacket(short cmd, byte[] data) {
+
+		ByteBuffer crcCheckBuffer = ByteBuffer.allocate(data.length + 2);
+		crcCheckBuffer.order(BYTE_ORDER);
+		crcCheckBuffer.putShort(cmd);
+		crcCheckBuffer.put(data);
+		byte[] crcCheckData = crcCheckBuffer.array();
+
+		short crc = (short) (CRC16.calculate(crcCheckData) & 0xFFFF);
+
+		int packetSize = 4 + 2 + 2 + data.length;
 		ByteBuffer buffer = ByteBuffer.allocate(packetSize);
+		buffer.order(BYTE_ORDER);
 		buffer.putInt(packetSize);
-		buffer.putInt(cmd);
+		buffer.putShort(crc);
+		buffer.putShort(cmd);
 		buffer.put(data);
+		buffer.flip();
 		return buffer;
 	}
 
@@ -287,8 +280,7 @@ public class AioTcpSession {
 			ByteBuffer buffer = outs.poll();
 			if (buffer != null) {
 				this.writeBuffer = buffer;
-				this.channel.write(this.writeBuffer, this,
-						this.writeCompletionHandler);
+				this.channel.write(buffer, this, this.writeCompletionHandler);
 			} else {
 				isWriting.set(false);
 			}

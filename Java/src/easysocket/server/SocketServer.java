@@ -1,11 +1,3 @@
-/*
- * EasySocket SocketServer.java
- *
- * Copyright (c) 2014, Qingfeng Lee
- * PROJECT DESCRIPTION
- * 
- * See LICENSE file for more information
- */
 package easysocket.server;
 
 import java.io.IOException;
@@ -36,20 +28,14 @@ public class SocketServer {
 		public void completed(AsynchronousSocketChannel channel, Void attachment) {
 			SocketServer.this.pendingAccept();
 
-			AioTcpSession session = null;
-			try {
-				session = new AioTcpSession(channel);
-				session.pendingRead();
-				int sessionId = session.getSessionId();
-				SESSION_POOL.put(sessionId, session);
+			AioTcpSession session = new AioTcpSession(channel);
+			session.pendingRead();
+			int sessionId = session.getSessionId();
+			SESSION_POOL.put(sessionId, session);
 
-				if (connectedEventHandler != null) {
-					connectedEventHandler.OnConnect(session);
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
+			if (connectedEventHandler != null) {
+				connectedEventHandler.OnConnect(session);
 			}
-
 		}
 
 		@Override
@@ -79,7 +65,7 @@ public class SocketServer {
 		AsynchronousServerSocketChannel server = AsynchronousServerSocketChannel
 				.open(channelGroup);
 		server.bind(new InetSocketAddress(port));
-		this.server = server;
+
 		this.pendingAccept();
 		logger.debug("server started at port " + this.port);
 	}

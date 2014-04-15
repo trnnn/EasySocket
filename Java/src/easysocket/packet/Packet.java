@@ -1,15 +1,6 @@
-/*
- * EasySocket Packet.java
- *
- * Copyright (c) 2014, Qingfeng Lee
- * PROJECT DESCRIPTION
- * 
- * See LICENSE file for more information
- */
 package easysocket.packet;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,34 +9,33 @@ import easysocket.session.AioTcpSession;
 
 public class Packet {
 	static final Logger logger = LoggerFactory.getLogger(Packet.class);
-	private final int cmd;
+	private final short cmd;
 	private final ByteBuffer buffer;
 	private AioTcpSession session;
-	private static final ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
 
-	public Packet(int cmd, AioTcpSession session) {
+	public Packet(short cmd, AioTcpSession session) {
 		this(cmd, Short.MAX_VALUE, session);
 	}
 
-	public Packet(int cmd, byte[] data, AioTcpSession session) {
+	public Packet(short cmd, byte[] data, AioTcpSession session) {
 		this.cmd = cmd;
 		this.session = session;
 		buffer = ByteBuffer.wrap(data);
-		buffer.order(byteOrder);
+		buffer.order(AioTcpSession.BYTE_ORDER);
 	}
 
-	public Packet(int cmd, int initialBufferSize, AioTcpSession session) {
+	public Packet(short cmd, int initialBufferSize, AioTcpSession session) {
 		this.cmd = cmd;
 		this.session = session;
 		buffer = ByteBuffer.allocate(initialBufferSize);
-		buffer.order(byteOrder);
+		buffer.order(AioTcpSession.BYTE_ORDER);
 	}
 
 	public ByteBuffer getByteBuffer() {
 		return this.buffer;
 	}
 
-	public int getCmd() {
+	public short getCmd() {
 		return cmd;
 	}
 

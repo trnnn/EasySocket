@@ -1,11 +1,3 @@
-/*
- * EasySocket PacketBuilder.java
- *
- * Copyright (c) 2014, Qingfeng Lee
- * PROJECT DESCRIPTION
- * 
- * See LICENSE file for more information
- */
 package easysocket.packet;
 
 import java.io.IOException;
@@ -49,7 +41,8 @@ public class PacketBuilder {
 				}
 				if (remaining >= len) {
 					buffer.getInt(); // to forward position
-					int cmd = buffer.getInt();
+					short crc = buffer.getShort();
+					short cmd = buffer.getShort();
 					byte[] data = new byte[len - 8];
 					buffer.get(data);
 
